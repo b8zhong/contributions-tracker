@@ -1,0 +1,54 @@
+name: Track Contributions
+
+on:
+  schedule:
+    - cron: '59 23 * * *' # Runs daily at 11:59 PM UTC
+  workflow_dispatch:  # Allows manual triggering
+
+permissions:
+  contents: write  # Explicitly grants read and write permissions for the GITHUB_TOKEN
+
+jobs:
+  track-contributions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Ensure on the correct branch
+        run: |
+          git fetch origin main
+          git checkout main
+          git pull origin main
+          git branch --show-current  # Log the current branch
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.0'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Log current repository status
+        run: |
+          git status
+          git log -3
+
+      - name: Run the contribution tracking script
+        run: node src/trackContributions.js
+        env:
+          WORK_GITHUB_TOKEN: ${{ secrets.WORK_GITHUB_TOKEN }} # Work account token
+          WORK_GITHUB_USERNAME: ${{ secrets.WORK_GITHUB_USERNAME }} # Work account username
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Personal account token
+
+      - name: Push changes to remote
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git push origin main || git push --set-upstream origin main
+
+      - name: Log repository status after push
+        run: |
+          git status
+          git log -3

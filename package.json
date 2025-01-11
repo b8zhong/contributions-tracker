@@ -1,0 +1,15 @@
+{
+    "name": "github-actions-contributions",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "start": "node src/trackContributions.js"
+    },
+    "dependencies": {
+        "axios": "^1.7.9"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": ""
+}
